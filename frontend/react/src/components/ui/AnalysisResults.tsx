@@ -143,11 +143,11 @@ export const AnalysisResults = memo(({ result, askInsight, insightLoading }: Ana
               </div>
               <div className="cb-eo-item">
                 <span className="cb-eo-label">Sensor Platform</span>
-                <span className="cb-eo-value">{result.sensor_type || "Sentinel-2 MSI"}</span>
+                <span className="cb-eo-value">{result.sensor_type || "Sentinel-2 MSI (Illustrative)"}</span>
               </div>
               <div className="cb-eo-item">
                 <span className="cb-eo-label">Spatial Resolution</span>
-                <span className="cb-eo-value">{result.spatial_resolution || "10m / Pixel"}</span>
+                <span className="cb-eo-value">{result.spatial_resolution || "10m / Pixel (Illustrative)"}</span>
               </div>
               <div className="cb-eo-item">
                 <span className="cb-eo-label">Projection</span>
@@ -155,11 +155,11 @@ export const AnalysisResults = memo(({ result, askInsight, insightLoading }: Ana
               </div>
               <div className="cb-eo-item">
                 <span className="cb-eo-label">Estimated NDVI</span>
-                <span className="cb-eo-value" style={{ color: "var(--green)" }}>{result.estimated_ndvi !== undefined ? result.estimated_ndvi.toFixed(2) : "0.45"}</span>
+                <span className="cb-eo-value" style={{ color: "var(--green)" }}>{result.estimated_ndvi !== undefined ? `${result.estimated_ndvi.toFixed(2)} (Illustrative)` : "0.45 (Illustrative)"}</span>
               </div>
               <div className="cb-eo-item">
                 <span className="cb-eo-label">Cloud Cover</span>
-                <span className="cb-eo-value">{result.cloud_cover_pct !== undefined ? `${result.cloud_cover_pct}%` : "2.4%"}</span>
+                <span className="cb-eo-value">{result.cloud_cover_pct !== undefined ? `${result.cloud_cover_pct}% (Illustrative)` : "2.4% (Illustrative)"}</span>
               </div>
               <div className="cb-eo-item" style={{ gridColumn: "1 / -1" }}>
                 <span className="cb-eo-label">Primary Land Cover</span>

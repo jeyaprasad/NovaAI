@@ -100,7 +100,10 @@ class AnalysisService:
         # ----------------------------------------------------------------
         logger.info("[analyze_image] Stage 2: Ensuring RemoteCLIP model is loaded.")
         self._ensure_model_loaded()
-        vision_model_id = f"RemoteCLIP {remoteclip_service.model_name}"
+        if remoteclip_service.model is not None:
+            vision_model_id = f"RemoteCLIP {remoteclip_service.model_name}"
+        else:
+            vision_model_id = "Heuristic Color Fallback (Mock)"
         logger.info(f"[analyze_image] Stage 2: Model ready — {vision_model_id}.")
 
         # ----------------------------------------------------------------

@@ -489,7 +489,7 @@ ${recommendations}
       cloud_cover_pct: 1.8,
       estimated_ndvi: category === "Forest" ? 0.78 : category === "Agricultural" ? 0.46 : category === "Residential" ? 0.22 : category === "Water" ? -0.15 : 0.08,
       spatial_resolution: "10 meters / Pixel",
-      citation: `NovaAI Sentinel-2 LULC Engine (2026). Mapped primary ${category.toLowerCase()} cover at ${location} (Coordinates: ${lat.toFixed(4)}°N, ${lng.toFixed(4)}°E). DOI: 10.5281/zenodo.nova-ai.${Date.now().toString().slice(-6)}.`,
+      citation: `NovaAI Sentinel-2 LULC Engine (2026). Mapped primary ${category.toLowerCase()} cover at ${location} (Coordinates: ${lat.toFixed(4)}°N, ${lng.toFixed(4)}°E). (Illustrative Preset Data)`,
       study_use_cases: category === "Forest" ? [
         "Forest canopy density (FCD) modeling & boundary encroachment detection.",
         "Carbon sequestration baseline studies for local carbon credit assessments.",
