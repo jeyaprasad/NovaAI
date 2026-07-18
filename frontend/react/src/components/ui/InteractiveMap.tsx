@@ -66,11 +66,11 @@ export function InteractiveMap({ onCategorySelect }: InteractiveMapProps) {
             }}
           >
             <Tooltip permanent direction="top" opacity={0.8} className="nova-map-tooltip">
-              {loc.name}
+              {loc.desc}
             </Tooltip>
             <Popup className="nova-map-popup">
-              <strong>{loc.name}</strong><br/>
-              <span style={{color: "var(--muted)", fontSize: "0.85em"}}>{loc.desc}</span><br/>
+              <strong>{loc.desc}</strong><br/>
+              <span style={{color: "var(--muted)", fontSize: "0.85em"}}>Category: {loc.name}</span><br/>
               Lat: {loc.lat.toFixed(4)}, Lng: {loc.lng.toFixed(4)}<br/>
               <button 
                 onClick={() => onCategorySelect(loc.name, loc.lat, loc.lng)}

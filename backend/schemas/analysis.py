@@ -102,6 +102,34 @@ class AnalysisResponse(BaseModel):
         None,
         description="Qualitative risk level: Low | Medium | High."
     )
+    scene_type: Optional[str] = Field(
+        None,
+        description="The type of the scene (e.g. Natural, Urban, Arid)."
+    )
+    sensor_type: Optional[str] = Field(
+        "Sentinel-2 MSI",
+        description="The sensor type or satellite platform."
+    )
+    cloud_cover_pct: Optional[float] = Field(
+        0.0,
+        description="Estimated cloud cover percentage of the scene."
+    )
+    estimated_ndvi: Optional[float] = Field(
+        None,
+        description="Estimated Normalized Difference Vegetation Index (NDVI) score."
+    )
+    spatial_resolution: Optional[str] = Field(
+        "10 meters / Pixel",
+        description="Estimated spatial resolution of the satellite image."
+    )
+    citation: Optional[str] = Field(
+        None,
+        description="Academic citation string for references."
+    )
+    study_use_cases: List[str] = Field(
+        default_factory=list,
+        description="List of academic study use cases for this specific land cover."
+    )
 
     # --- Metadata ---
     metadata: AnalysisMetadata = Field(
