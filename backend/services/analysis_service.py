@@ -265,6 +265,9 @@ class AnalysisService:
         Reuses the already-loaded model if available (no re-loading per request).
         """
         if remoteclip_service.model is None:
+            if not remoteclip_service._checkpoint_valid():
+                logger.warning("[_ensure_model_loaded] RemoteCLIP checkpoint is invalid or incomplete. Skipping bootstrapping and will use mock fallback.")
+                return
             logger.info("RemoteCLIP model not yet loaded — bootstrapping now.")
             remoteclip_service.load_model()
 
