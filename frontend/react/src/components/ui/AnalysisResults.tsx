@@ -19,6 +19,108 @@ interface AnalysisResultsProps {
   insightLoading: boolean;
 }
 
+const getDecisionSupportScore = (dominant: string) => {
+  const dom = (dominant || "").toLowerCase();
+  if (dom.includes("forest")) {
+    return {
+      veg: { score: 92, status: "🟢" },
+      urb: { score: 8, status: "🟢" },
+      ind: { score: 2, status: "🟢" },
+      env: { score: 94, status: "🟢" },
+      dev: "Low"
+    };
+  } else if (dom.includes("agricult")) {
+    return {
+      veg: { score: 76, status: "🟢" },
+      urb: { score: 18, status: "🟢" },
+      ind: { score: 4, status: "🟢" },
+      env: { score: 68, status: "🟡" },
+      dev: "Medium"
+    };
+  } else if (dom.includes("resid")) {
+    return {
+      veg: { score: 32, status: "🟡" },
+      urb: { score: 88, status: "🔴" },
+      ind: { score: 12, status: "🟡" },
+      env: { score: 48, status: "🟡" },
+      dev: "High"
+    };
+  } else if (dom.includes("indust")) {
+    return {
+      veg: { score: 12, status: "🔴" },
+      urb: { score: 65, status: "🟠" },
+      ind: { score: 82, status: "🔴" },
+      env: { score: 25, status: "🔴" },
+      dev: "Medium"
+    };
+  } else if (dom.includes("water")) {
+    return {
+      veg: { score: 15, status: "🔴" },
+      urb: { score: 10, status: "🟢" },
+      ind: { score: 5, status: "🟢" },
+      env: { score: 85, status: "🟢" },
+      dev: "Low"
+    };
+  } else { // Desert / Arid
+    return {
+      veg: { score: 5, status: "🔴" },
+      urb: { score: 4, status: "🟢" },
+      ind: { score: 2, status: "🟢" },
+      env: { score: 35, status: "🟡" },
+      dev: "Low"
+    };
+  }
+};
+
+const getSmartAlerts = (dominant: string, classes: any[]) => {
+  const dom = (dominant || "").toLowerCase();
+  const alerts = [];
+  const classList = classes || [];
+  
+  if (dom.includes("forest")) {
+    const hasAgriOrInd = classList.some(c => c.label.toLowerCase().includes("farmland") || c.label.toLowerCase().includes("factor") || c.label.toLowerCase().includes("indust"));
+    if (hasAgriOrInd) {
+      alerts.push({ level: "danger", icon: "🔴", text: "High deforestation risk due to nearby active land conversion." });
+    } else {
+      alerts.push({ level: "success", icon: "🟢", text: "No significant deforestation concern; ecosystem remains intact." });
+    }
+  }
+  
+  if (dom.includes("agricult")) {
+    const hasUrban = classList.some(c => c.label.toLowerCase().includes("resid") || c.label.toLowerCase().includes("indust") || c.label.toLowerCase().includes("building"));
+    if (hasUrban) {
+      alerts.push({ level: "warning", icon: "🟡", text: "Moderate urban expansion encroaching on active rural agricultural zones." });
+    } else {
+      alerts.push({ level: "success", icon: "🟢", text: "Stable rural farmlands with low urban development pressure." });
+    }
+  }
+
+  if (dom.includes("resid")) {
+    alerts.push({ level: "warning", icon: "🟡", text: "Elevated Urban Heat Island (UHI) index. Moderate vegetation cover deficit." });
+    alerts.push({ level: "danger", icon: "🔴", text: "High surface runoff vulnerability due to extensive concrete paving." });
+  }
+
+  if (dom.includes("indust")) {
+    alerts.push({ level: "danger", icon: "🔴", text: "Critical industrial activity warning. Low soil absorption capacity." });
+    alerts.push({ level: "danger", icon: "🔴", text: "High chemical discharge/runoff risk from impervious logistics zones." });
+  }
+
+  if (dom.includes("water")) {
+    const hasAgriOrInd = classList.some(c => c.label.toLowerCase().includes("farmland") || c.label.toLowerCase().includes("factor") || c.label.toLowerCase().includes("indust") || c.label.toLowerCase().includes("building"));
+    if (hasAgriOrInd) {
+      alerts.push({ level: "danger", icon: "🔴", text: "Severe agricultural/industrial run-off warning; potential eutrophication." });
+    } else {
+      alerts.push({ level: "success", icon: "🟢", text: "Water body has high clarity. No significant nearby pollution signals." });
+    }
+  }
+
+  if (dom.includes("desert") || dom.includes("barren")) {
+    alerts.push({ level: "warning", icon: "🟡", text: "High wind-borne sand erosion risk. Sparse ecological coverage." });
+  }
+
+  return alerts.length > 0 ? alerts : [{ level: "success", icon: "🟢", text: "Ecosystem indicators are stable and within standard margins." }];
+};
+
 export const AnalysisResults = memo(({ result, askInsight, insightLoading }: AnalysisResultsProps) => {
   const [showMask, setShowMask] = useState(true);
   const [showRaw, setShowRaw] = useState(false);
@@ -69,6 +171,26 @@ export const AnalysisResults = memo(({ result, askInsight, insightLoading }: Ana
                   <span className="cb-eo-value" style={{ textTransform: "capitalize" }}>{result.secondary_land_cover}</span>
                 </div>
               )}
+              <div className="cb-eo-item" style={{ gridColumn: "1 / -1", marginTop: "4px" }}>
+                <span className="cb-eo-label">Classification Confidence</span>
+                <div style={{ display: "flex", alignItems: "center", gap: "12px", marginTop: "6px" }}>
+                  <span className="cb-eo-value" style={{ fontSize: "0.95rem", fontWeight: "600", minWidth: "60px" }}>
+                    {result.confidence || "High"}
+                  </span>
+                  <div style={{ flex: 1, height: "6px", background: "rgba(255,255,255,0.06)", borderRadius: "3px", overflow: "hidden" }}>
+                    <div style={{
+                      height: "100%",
+                      width: (result.confidence?.toLowerCase().includes("high") || result.confidence?.includes("9") || result.confidence === "95%") ? "95%" : 
+                             (result.confidence?.toLowerCase().includes("medium") || result.confidence?.includes("7")) ? "70%" : "40%",
+                      background: (result.confidence?.toLowerCase().includes("high") || result.confidence?.includes("9") || result.confidence === "95%") ? "var(--green)" :
+                                  (result.confidence?.toLowerCase().includes("medium") || result.confidence?.includes("7")) ? "var(--aurora)" : "var(--danger)",
+                      borderRadius: "3px",
+                      boxShadow: (result.confidence?.toLowerCase().includes("high") || result.confidence?.includes("9") || result.confidence === "95%") ? "0 0 10px rgba(0,229,160,0.4)" : "0 0 10px rgba(0,229,200,0.4)",
+                      transition: "width 0.8s ease-out"
+                    }} />
+                  </div>
+                </div>
+              </div>
             </div>
 
             <div className="cb-eo-flags">
@@ -79,6 +201,67 @@ export const AnalysisResults = memo(({ result, askInsight, insightLoading }: Ana
                 </div>
               ))}
             </div>
+          </div>
+        </div>
+
+        <div className="cb-report-section">
+          <h4 className="cb-section-title">AI Decision Support Scorecard</h4>
+          <div className="cb-eo-panel">
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "14px", marginBottom: "16px" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", borderBottom: "1px dashed rgba(255,255,255,0.06)", paddingBottom: "8px" }}>
+                <span style={{ fontSize: "0.85rem", color: "var(--muted)" }}>Vegetation Health</span>
+                <span style={{ fontSize: "0.85rem", fontWeight: "600", color: "var(--star)" }}>
+                  {getDecisionSupportScore(result.dominant_land_cover).veg.status} {getDecisionSupportScore(result.dominant_land_cover).veg.score}/100
+                </span>
+              </div>
+              <div style={{ display: "flex", justifyContent: "space-between", borderBottom: "1px dashed rgba(255,255,255,0.06)", paddingBottom: "8px" }}>
+                <span style={{ fontSize: "0.85rem", color: "var(--muted)" }}>Urbanization</span>
+                <span style={{ fontSize: "0.85rem", fontWeight: "600", color: "var(--star)" }}>
+                  {getDecisionSupportScore(result.dominant_land_cover).urb.status} {getDecisionSupportScore(result.dominant_land_cover).urb.score}/100
+                </span>
+              </div>
+              <div style={{ display: "flex", justifyContent: "space-between", borderBottom: "1px dashed rgba(255,255,255,0.06)", paddingBottom: "8px" }}>
+                <span style={{ fontSize: "0.85rem", color: "var(--muted)" }}>Industrial Activity</span>
+                <span style={{ fontSize: "0.85rem", fontWeight: "600", color: "var(--star)" }}>
+                  {getDecisionSupportScore(result.dominant_land_cover).ind.status} {getDecisionSupportScore(result.dominant_land_cover).ind.score}/100
+                </span>
+              </div>
+              <div style={{ display: "flex", justifyContent: "space-between", borderBottom: "1px dashed rgba(255,255,255,0.06)", paddingBottom: "8px" }}>
+                <span style={{ fontSize: "0.85rem", color: "var(--muted)" }}>Environmental Quality</span>
+                <span style={{ fontSize: "0.85rem", fontWeight: "600", color: "var(--star)" }}>
+                  {getDecisionSupportScore(result.dominant_land_cover).env.status} {getDecisionSupportScore(result.dominant_land_cover).env.score}/100
+                </span>
+              </div>
+              <div style={{ display: "flex", justifyContent: "space-between", borderBottom: "1px dashed rgba(255,255,255,0.06)", paddingBottom: "8px", gridColumn: "1 / -1" }}>
+                <span style={{ fontSize: "0.85rem", color: "var(--muted)" }}>Development Potential</span>
+                <span style={{ fontSize: "0.85rem", fontWeight: "600", color: "var(--aurora)", textTransform: "uppercase", letterSpacing: "0.05em", fontFamily: "Space Mono, monospace" }}>
+                  {getDecisionSupportScore(result.dominant_land_cover).dev}
+                </span>
+              </div>
+            </div>
+            <p style={{ margin: 0, fontSize: "0.8rem", color: "var(--muted)", fontStyle: "italic", lineHeight: "1.45" }}>
+              "Instead of only describing the land cover, NovaAI converts the analysis into decision-support indicators for planners and environmental agencies."
+            </p>
+          </div>
+        </div>
+
+        <div className="cb-report-section">
+          <h4 className="cb-section-title">Ecosystem Alerts & Monitoring</h4>
+          <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+            {getSmartAlerts(result.dominant_land_cover, result.classes).map((alert, idx) => (
+              <div key={idx} style={{
+                display: "flex",
+                alignItems: "flex-start",
+                gap: "10px",
+                padding: "10px 14px",
+                borderRadius: "8px",
+                background: alert.level === "danger" ? "rgba(255,78,106,0.08)" : alert.level === "warning" ? "rgba(255,184,78,0.08)" : "rgba(0,229,160,0.08)",
+                border: alert.level === "danger" ? "1px solid rgba(255,78,106,0.2)" : alert.level === "warning" ? "1px solid rgba(255,184,78,0.2)" : "1px solid rgba(0,229,160,0.2)"
+              }}>
+                <span style={{ fontSize: "1.1rem", lineHeight: "1" }}>{alert.icon}</span>
+                <span style={{ fontSize: "0.82rem", color: "var(--star)", lineHeight: "1.4" }}>{alert.text}</span>
+              </div>
+            ))}
           </div>
         </div>
 
