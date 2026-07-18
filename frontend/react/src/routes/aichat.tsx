@@ -81,12 +81,14 @@ function NovaDemo() {
             {/* LEFT PANE: MAP */}
             {!showHistory && (
               <div className="cb-pane cb-map-pane">
-                <InteractiveMap 
-                  onCategorySelect={(category, lat, lng) => {
-                    setSelectedLocation({ lat, lng });
-                    simulateMapClickAnalysis(category, lat, lng);
-                  }} 
-                />
+                {typeof window !== "undefined" && (
+                  <InteractiveMap 
+                    onCategorySelect={(category, lat, lng) => {
+                      setSelectedLocation({ lat, lng });
+                      simulateMapClickAnalysis(category, lat, lng);
+                    }} 
+                  />
+                )}
               </div>
             )}
 
