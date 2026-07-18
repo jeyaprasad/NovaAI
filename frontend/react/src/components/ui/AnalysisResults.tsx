@@ -1,6 +1,7 @@
 import React, { memo, useState } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 import { AnalysisResult } from "../../hooks/useAnalysis";
+import { PieChart, Pie, Cell, Tooltip as RechartsTooltip, ResponsiveContainer, Legend } from "recharts";
 
 function ErrorFallback({ error, resetErrorBoundary }: any) {
   return (
@@ -73,12 +74,41 @@ export const AnalysisResults = memo(({ result, askInsight, insightLoading }: Ana
           <div className="cb-report-section">
             <h4 className="cb-section-title">Segmentation Map</h4>
             <div className="cb-report-image-container">
-              {/* Note: This assumes previewUrl is accessible or you pass base image as prop. 
-                  If base image is not passed, mask is just displayed. */}
               {showMask && <img src={`data:image/png;base64,${result.mask_image}`} alt="Mask Overlay" className="cb-mask-overlay" style={{ opacity: 1, mixBlendMode: 'normal' }} />}
               <button className="cb-mask-toggle" onClick={() => setShowMask(!showMask)}>
                 {showMask ? "Hide SegMap" : "Show SegMap"}
               </button>
+            </div>
+          </div>
+        )}
+
+        {result.classes && result.classes.length > 0 && (
+          <div className="cb-report-section">
+            <h4 className="cb-section-title">Land Cover Distribution</h4>
+            <div className="cb-eo-panel" style={{ height: 250, padding: 0 }}>
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={result.classes}
+                    dataKey="pct"
+                    nameKey="label"
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={60}
+                    outerRadius={90}
+                    stroke="none"
+                  >
+                    {result.classes.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.color} />
+                    ))}
+                  </Pie>
+                  <RechartsTooltip 
+                    contentStyle={{ backgroundColor: 'var(--card)', border: '1px solid var(--border)', borderRadius: '8px' }}
+                    itemStyle={{ color: 'var(--star)' }}
+                  />
+                  <Legend verticalAlign="bottom" height={36} wrapperStyle={{ fontSize: '0.85rem' }}/>
+                </PieChart>
+              </ResponsiveContainer>
             </div>
           </div>
         )}

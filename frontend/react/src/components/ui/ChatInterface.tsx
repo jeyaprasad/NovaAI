@@ -22,6 +22,7 @@ interface ChatInterfaceProps {
   askInsight: (q: string) => void;
   insightLoading: boolean;
   handleResetChat: () => void;
+  selectedLocation?: { lat: number; lng: number } | null;
 }
 
 export const ChatInterface = memo(({
@@ -40,7 +41,8 @@ export const ChatInterface = memo(({
   showHistory,
   askInsight,
   insightLoading,
-  handleResetChat
+  handleResetChat,
+  selectedLocation
 }: ChatInterfaceProps) => {
   const chatEndRef = useRef<HTMLDivElement>(null);
 
@@ -67,6 +69,9 @@ export const ChatInterface = memo(({
           <div className="cb-hero-orb orb2"></div>
           <h2>Analyze Satellite Imagery</h2>
           <h1><span className="nebula-text">Earth Observation</span> Assistant</h1>
+          <p style={{ color: "var(--muted)", marginBottom: "30px", marginTop: "-20px" }}>
+            Select a region on the map, then attach a satellite image to begin analysis.
+          </p>
           <div className="cb-suggestions">
             <button onClick={() => setChatInput("Identify bodies of water and calculate total area.")}>
               <div className="sg-icon">💧</div>
@@ -161,7 +166,13 @@ export const ChatInterface = memo(({
               />
               <textarea
                 id="chat-input-textarea"
-                placeholder={file || result ? "Ask a follow-up question..." : "Describe what you want to analyze..."}
+                placeholder={
+                  file || result
+                    ? "Ask a follow-up question..."
+                    : selectedLocation
+                    ? `Location selected: ${selectedLocation.lat.toFixed(4)}, ${selectedLocation.lng.toFixed(4)}. Attach image to analyze...`
+                    : "Select a region on the map or attach an image..."
+                }
                 value={chatInput}
                 onChange={(e) => setChatInput(e.target.value)}
                 onKeyDown={handleKeyDown}

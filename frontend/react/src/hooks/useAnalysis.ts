@@ -49,7 +49,7 @@ export interface ChatSession {
   previewUrl: string | null;
 }
 
-const API_BASE = (import.meta as any).env?.VITE_API_BASE_URL ?? "http://localhost:8000";
+const API_BASE = (import.meta as any).env?.VITE_API_BASE_URL ?? "http://127.0.0.1:8000";
 
 export const PIPELINE_STAGES = [
   { icon: "📤", title: "Uploading Image...", desc: "Transferring file to secure server" },
@@ -318,6 +318,115 @@ export function useAnalysis() {
     }
   }, [abortController]);
 
+  const simulateMapClickAnalysis = useCallback((category: string, lat: number, lng: number) => {
+    handleReset();
+    
+    // Generate data based on category
+    let location = "Unknown";
+    let landCover = "";
+    let classes: LandCoverClass[] = [];
+    let indicators = "";
+    let recommendations = "";
+
+    if (category === "Forest") {
+      location = "Western Ghats";
+      landCover = "Forest        85%\\nWater          8%\\nOthers         7%";
+      classes = [
+        { label: "Forest", pct: 85, color: "#22c55e" },
+        { label: "Water", pct: 8, color: "#3b82f6" },
+        { label: "Others", pct: 7, color: "#9ca3af" },
+      ];
+      indicators = "Vegetation Health : Excellent\\nUrban Expansion   : Minimal\\nWater Availability: High\\nRisk Level        : Low";
+      recommendations = "* Maintain conservation efforts\\n* Monitor for illegal logging\\n* Protect local biodiversity";
+    } else if (category === "Industrial") {
+      location = "Hosur";
+      landCover = "Forest        12%\\nIndustrial    65%\\nRoads         15%\\nOthers         8%";
+      classes = [
+        { label: "Industrial", pct: 65, color: "#64748b" },
+        { label: "Roads", pct: 15, color: "#475569" },
+        { label: "Forest", pct: 12, color: "#22c55e" },
+        { label: "Others", pct: 8, color: "#9ca3af" },
+      ];
+      indicators = "Vegetation Health : Poor\\nUrban Expansion   : High\\nWater Availability: Moderate\\nRisk Level        : Medium";
+      recommendations = "* Implement green buffer zones\\n* Monitor industrial emissions\\n* Plan sustainable expansion";
+    } else if (category === "Residential") {
+      location = "Bangalore";
+      landCover = "Residential   55%\\nCommercial    20%\\nRoads         15%\\nVegetation    10%";
+      classes = [
+        { label: "Residential", pct: 55, color: "#f59e0b" },
+        { label: "Commercial", pct: 20, color: "#8b5cf6" },
+        { label: "Roads", pct: 15, color: "#475569" },
+        { label: "Vegetation", pct: 10, color: "#22c55e" },
+      ];
+      indicators = "Vegetation Health : Moderate\\nUrban Expansion   : Very High\\nWater Availability: Low\\nRisk Level        : Medium";
+      recommendations = "* Expand urban green spaces\\n* Upgrade drainage infrastructure\\n* Monitor traffic congestion zones";
+    } else if (category === "Water") {
+      location = "Kelavarapalli Dam";
+      landCover = "Water         75%\\nAgriculture   15%\\nForest        10%";
+      classes = [
+        { label: "Water", pct: 75, color: "#3b82f6" },
+        { label: "Agriculture", pct: 15, color: "#84cc16" },
+        { label: "Forest", pct: 10, color: "#22c55e" },
+      ];
+      indicators = "Vegetation Health : Good\\nUrban Expansion   : Low\\nWater Availability: Excellent\\nRisk Level        : Low";
+      recommendations = "* Monitor water quality\\n* Protect catchment area\\n* Regulate agricultural runoff";
+    } else {
+      location = "Rural Tamil Nadu";
+      landCover = "Agriculture   60%\\nForest        20%\\nWater         10%\\nResidential   10%";
+      classes = [
+        { label: "Agriculture", pct: 60, color: "#84cc16" },
+        { label: "Forest", pct: 20, color: "#22c55e" },
+        { label: "Water", pct: 10, color: "#3b82f6" },
+        { label: "Residential", pct: 10, color: "#f59e0b" },
+      ];
+      indicators = "Vegetation Health : Good\\nUrban Expansion   : Low\\nWater Availability: Moderate\\nRisk Level        : Low";
+      recommendations = "* Promote crop diversification\\n* Implement drip irrigation\\n* Monitor seasonal drought risks";
+    }
+
+    const reportText = `\`\`\`text
+==========================
+Earth Observation Report
+==========================
+Location : ${location} (${lat.toFixed(2)}, ${lng.toFixed(2)})
+Satellite : Sentinel-2
+Resolution : 10m
+Date : 13-07-2026
+Cloud Cover : 4%
+---------------------------------
+Land Cover Summary
+---------------------------------
+${landCover}
+---------------------------------
+Environmental Indicators
+---------------------------------
+${indicators}
+---------------------------------
+Recommendations
+---------------------------------
+${recommendations}
+\`\`\`
+`;
+
+    const mockResult: AnalysisResult = {
+      status: "success",
+      dominant_land_cover: classes[0].label.toLowerCase(),
+      confidence: "95%",
+      summary: `Analysis complete for ${location}. Primary land cover is ${classes[0].label}.`,
+      classes,
+      flags: [],
+      insight: reportText,
+      scene_type: category
+    };
+
+    setMessages([
+      { role: "user", text: `Analyze region at ${lat.toFixed(4)}, ${lng.toFixed(4)} (${category})` },
+      { role: "assistant", text: reportText, isReport: true }
+    ]);
+    setResult(mockResult);
+    setStatus("done");
+
+  }, [handleReset]);
+
   return {
     file,
     previewUrl,
@@ -334,6 +443,7 @@ export function useAnalysis() {
     restoreSession,
     runAnalysis,
     askInsight,
-    abortRequest
+    abortRequest,
+    simulateMapClickAnalysis
   };
 }
