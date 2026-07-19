@@ -224,11 +224,20 @@ class AnalysisService:
             "Water": "Aquatic / Inland Water",
             "Desert": "Barren / Arid"
         }
+        sdg_map = {
+            "Forest": ["SDG 13: Climate Action", "SDG 15: Life on Land"],
+            "Agriculture": ["SDG 2: Zero Hunger", "SDG 12: Responsible Consumption"],
+            "Residential": ["SDG 11: Sustainable Cities"],
+            "Industrial": ["SDG 9: Industry & Infrastructure", "SDG 12: Responsible Consumption"],
+            "Water": ["SDG 6: Clean Water & Sanitation", "SDG 14: Life Below Water"],
+            "Desert": ["SDG 13: Climate Action", "SDG 15: Life on Land"]
+        }
         
         dominant_key = eo_result.dominant_land_cover
         estimated_ndvi = ndvi_map.get(dominant_key, 0.35)
         study_use_cases = use_cases_map.get(dominant_key, ["General LULC Classification"])
         scene_type = scene_type_map.get(dominant_key, "Urban / Natural Mix")
+        sdg_badges = sdg_map.get(dominant_key, ["SDG 11: Sustainable Cities"])
         cloud_cover_pct = 2.4 # Standard cloud cover metric
         spatial_resolution = "10 meters / Pixel"
         sensor_type = "Sentinel-2 MSI (Multispectral Instrument)"
@@ -259,6 +268,7 @@ class AnalysisService:
             spatial_resolution=spatial_resolution,
             citation=citation,
             study_use_cases=study_use_cases,
+            sdg_badges=sdg_badges,
             metadata=AnalysisMetadata(
                 vision_model=vision_model_id,
                 llm_model=llm_model_id,

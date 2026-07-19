@@ -38,6 +38,7 @@ export interface AnalysisResult {
   spatial_resolution?: string;
   citation?: string;
   study_use_cases?: string[];
+  sdg_badges?: string[];
 }
 
 export interface ChatMessage {

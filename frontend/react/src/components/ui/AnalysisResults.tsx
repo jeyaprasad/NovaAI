@@ -125,11 +125,29 @@ export const AnalysisResults = memo(({ result, askInsight, insightLoading }: Ana
   const [showMask, setShowMask] = useState(true);
   const [showRaw, setShowRaw] = useState(false);
 
+  const handleDownloadJSON = () => {
+    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(result, null, 2));
+    const downloadAnchorNode = document.createElement('a');
+    downloadAnchorNode.setAttribute("href", dataStr);
+    downloadAnchorNode.setAttribute("download", "nova-eo-report.json");
+    document.body.appendChild(downloadAnchorNode);
+    downloadAnchorNode.click();
+    downloadAnchorNode.remove();
+  };
+
+  const handleDownloadPDF = () => {
+    window.print();
+  };
+
   return (
     <ErrorBoundary FallbackComponent={ErrorFallback} onReset={() => { setShowMask(true); }}>
       <div className="cb-report-card nova-reveal nova-in">
         <div className="cb-report-header">
           <h3>Earth Observation Report</h3>
+          <div className="cb-report-actions">
+            <button className="cb-attach-btn" style={{ padding: "6px 12px", fontSize: "0.8rem", marginRight: "8px", background: "rgba(255,255,255,0.05)" }} onClick={handleDownloadPDF}>📄 PDF</button>
+            <button className="cb-attach-btn" style={{ padding: "6px 12px", fontSize: "0.8rem", background: "rgba(255,255,255,0.05)" }} onClick={handleDownloadJSON}>{"{ }"} JSON</button>
+          </div>
         </div>
         <hr className="cb-divider" />
 
@@ -244,6 +262,27 @@ export const AnalysisResults = memo(({ result, askInsight, insightLoading }: Ana
             </p>
           </div>
         </div>
+
+        {result.sdg_badges && result.sdg_badges.length > 0 && (
+          <div className="cb-report-section">
+            <h4 className="cb-section-title">UN Sustainable Development Goals</h4>
+            <div className="cb-eo-panel" style={{ padding: '16px 20px', display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+              {result.sdg_badges.map((badge, idx) => (
+                <div key={idx} style={{
+                  background: 'rgba(0, 229, 200, 0.1)',
+                  border: '1px solid rgba(0, 229, 200, 0.3)',
+                  color: 'var(--aurora)',
+                  padding: '6px 12px',
+                  borderRadius: '20px',
+                  fontSize: '0.85rem',
+                  fontWeight: 500,
+                }}>
+                  🌍 {badge}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         <div className="cb-report-section">
           <h4 className="cb-section-title">Ecosystem Alerts & Monitoring</h4>

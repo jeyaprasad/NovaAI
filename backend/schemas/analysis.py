@@ -130,6 +130,10 @@ class AnalysisResponse(BaseModel):
         default_factory=list,
         description="List of academic study use cases for this specific land cover."
     )
+    sdg_badges: List[str] = Field(
+        default_factory=list,
+        description="Relevant UN Sustainable Development Goals."
+    )
 
     # --- Metadata ---
     metadata: AnalysisMetadata = Field(

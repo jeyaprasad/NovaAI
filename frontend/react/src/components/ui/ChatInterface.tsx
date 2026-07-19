@@ -61,6 +61,25 @@ export const ChatInterface = memo(({
     }
   };
 
+  const sampleImages = [
+    { name: "Forest", url: "/samples/forest.jpeg" },
+    { name: "Agriculture", url: "/samples/agriculture.jpeg" },
+    { name: "Industrial", url: "/samples/industrial.jpeg" },
+    { name: "Residential", url: "/samples/residential.jpeg" },
+    { name: "Water", url: "/samples/water.jpeg" },
+  ];
+
+  const handleSampleClick = async (url: string, name: string) => {
+    try {
+      const response = await fetch(url);
+      const blob = await response.blob();
+      const fileObj = new File([blob], `${name}.jpeg`, { type: "image/jpeg" });
+      handleFile(fileObj);
+    } catch (err) {
+      console.error("Failed to load sample image", err);
+    }
+  };
+
   return (
     <div className="cb-chat-container">
       {messages.length === 0 && status === "idle" && !showHistory ? (
@@ -94,6 +113,19 @@ export const ChatInterface = memo(({
                 <p>Analyze crop vitality</p>
               </div>
             </button>
+          </div>
+
+          <div className="cb-sample-gallery">
+            {sampleImages.map((sample) => (
+              <img 
+                key={sample.name}
+                src={sample.url} 
+                alt={`Sample ${sample.name}`}
+                className="cb-sample-img"
+                onClick={() => handleSampleClick(sample.url, sample.name)}
+                title={`Try ${sample.name} sample`}
+              />
+            ))}
           </div>
         </div>
       ) : !showHistory ? (
